@@ -139,9 +139,22 @@ def cross_correlation(f, g):
         out: numpy array of shape (Hf, Wf)
     """
 
-    out = None
+    #out = None
     ### YOUR CODE HERE
-    pass
+    
+    wf,hf = f.shape 
+    wg,hg = g.shape 
+    
+    out = np.zeros((wf,hf))
+    
+    for x in range(wf - wg):
+        for y in range(hf-hg):
+            if (f[x:x+wg,y:y+hg] == g[:]).all():
+                print (x,y)
+                out[x:x+wg,y:y+hg] = f[x:x+wg,y:y+hg]  
+    # print ("f ", f.shape ) image
+    #print ("g ", g.shape ) #mash 
+            
     ### END YOUR CODE
 
     return out
@@ -161,9 +174,17 @@ def zero_mean_cross_correlation(f, g):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    
+    out = f 
+    wf,hf = f.shape 
+    wg,hg = g.shape 
+    zmean = np.average(g)
+    for x in range(wf):
+        for y in range(hf):
+            out[x,y] = f[x,y] - zmean 
     ### END YOUR CODE
 
+    print (zmean)
     return out
 
 def normalized_cross_correlation(f, g):
@@ -182,7 +203,7 @@ def normalized_cross_correlation(f, g):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    
     ### END YOUR CODE
 
     return out
