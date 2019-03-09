@@ -42,7 +42,8 @@ def change_value(image):
     out = np.zeros(image.shape)
     for x in range(len(image)):
         for y in range(len(image[0])):
-            out[x,y] = np.dot(image[x,y],image[x,y])*0.5 
+            
+            out[x,y] = image[x,y]*image[x,y]*0.5 
     
     ### END YOUR CODE
     
@@ -115,15 +116,15 @@ def lab_decomposition(image, channel):
 
     ### YOUR CODE HERE
     if channel == 'L':
-        out = np.copy(image)
+        out = np.copy(lab)
         out[:,:,0] = 0
     
     if channel == 'A':
-        out = np.copy(image)
+        out = np.copy(lab)
         out[:,:,1] = 0
 
     if channel == 'B':
-        out = np.copy(image)
+        out = np.copy(lab)
         out[:,:,2] = 0
     ### END YOUR CODE
 
@@ -145,15 +146,15 @@ def hsv_decomposition(image, channel='H'):
 
     ### YOUR CODE HERE
     if channel == 'H':
-        out = np.copy(image)
+        out = np.copy(hsv)
         out[:,:,0] = 0
     
     if channel == 'S':
-        out = np.copy(image)
+        out = np.copy(hsv)
         out[:,:,1] = 0
 
     if channel == 'V':
-        out = np.copy(image)
+        out = np.copy(hsv)
         out[:,:,2] = 0
     ### END YOUR CODE
 

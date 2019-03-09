@@ -1,6 +1,6 @@
 import numpy as np
-
-
+from scipy import signal
+ 
 def conv_nested(image, kernel):
     """A naive implementation of convolution filter.
 
@@ -22,18 +22,22 @@ def conv_nested(image, kernel):
     ### YOUR CODE HERE
     #https://docs.scipy.org/doc/numpy/reference/generated/numpy.flip.html
     
-    #kernel = np.flip(kernel,1)
+    kernel = np.flip(kernel,1)
     
-    pixel = np.zeros((9))
+    print (Hk,Wk)
+    
+    pixel = np.zeros((Hk*Wk))
+    print (pixel.shape)
+    
     k =0 
-    for x in range(1,len(image)-1) :
-        for y in range (1,len(image[0])-1):
+    for x in range(Wk,len(image)-Wk,1) :
+        for y in range (Hk,len(image[0])-Hk,1):
             k=0
-            for i in range (-1,2,1):
-                for j in range (-1,2,1) :
-                    pixel[k] = image[x+i,y+j]*kernel[i+1,j+1]
+            for i in range (-(Wk//2),(Wk//2)+1,1):
+                for j in range (-(Hk//2),(Hk//2)+1,1) :
+                    pixel[k] = image[x+i,y+j] * kernel[i+(Wk//2),j+(Hk//2)]
                     k = k + 1
-            out[x,y] = (np.sum(pixel))
+            out[x,y] = (np.sum(pixel[:]))
     ### END YOUR CODE
     return out
 
@@ -94,6 +98,8 @@ def conv_fast(image, kernel):
     """
     Hi, Wi = image.shape
     Hk, Wk = kernel.shape
+    
+    kernel = np.flip(kernel,1)
     out = np.zeros((Hi, Wi))
 
     ### YOUR CODE HERE
@@ -104,7 +110,7 @@ def conv_fast(image, kernel):
             out[x,y] = (np.sum(temp[:]))
     ### END YOUR CODE
     
-   
+  
     return out
 
 def conv_faster(image, kernel):
@@ -143,17 +149,15 @@ def cross_correlation(f, g):
     ### YOUR CODE HERE
     
     wf,hf = f.shape 
+    g = g[:55,:]
     wg,hg = g.shape 
-    
+    print (g.shape)
     out = np.zeros((wf,hf))
     
-    for x in range(wf - wg):
-        for y in range(hf-hg):
-            if (f[x:x+wg,y:y+hg] == g[:]).all():
-                print (x,y)
-                out[x:x+wg,y:y+hg] = f[x:x+wg,y:y+hg]  
-    # print ("f ", f.shape ) image
-    #print ("g ", g.shape ) #mash 
+    for x in range(wg//2,len(f)-(wg//2)) :
+        for y in range (hg//2,len(f[0])-hg//2):
+            temp =  np.corrcoef(f[x-(wg//2):x+(wg//2)+1,y-(hg//2):y+(hg//2)+1],g)
+            out[x,y] = (np.sum(temp))
             
     ### END YOUR CODE
 
@@ -174,36 +178,54 @@ def zero_mean_cross_correlation(f, g):
 
     out = None
     ### YOUR CODE HERE
-    
-    out = f 
     wf,hf = f.shape 
     wg,hg = g.shape 
-    zmean = np.average(g)
+    
+    out = np.zeros((wf,hf))
+    zmeang = np.mean(g)
+    zmeanf = np.mean(f)
+    fnew = np.zeros((wf,hf))
+    
     for x in range(wf):
         for y in range(hf):
-            out[x,y] = f[x,y] - zmean 
+            fnew = f[x,y] - zmeanf
+              
+    for x in range(wg):
+        for y in range (hg):
+            gnew = g - zmeang
     ### END YOUR CODE
 
-    print (zmean)
+    out = cross_correlation(f,g)
     return out
 
 def normalized_cross_correlation(f, g):
     """ Normalized cross-correlation of f and g
-
     Normalize the subimage of f and the template g at each step
     before computing the weighted sum of the two.
-
     Args:
         f: numpy array of shape (Hf, Wf)
         g: numpy array of shape (Hg, Wg)
-
     Returns:
         out: numpy array of shape (Hf, Wf)
     """
-
-    out = None
     ### YOUR CODE HERE
+    wf,hf = f.shape 
+    wg,hg = g.shape 
     
-    ### END YOUR CODE
+    out = np.zeros((wf,hf))
+    zmeang = np.mean(g)
+    standarG = np.std(g)
+    gnew = (g-zmeang)/standarG
+    fnew = out = np.zeros((wf,hf))
+    
+    for x in range(wf-wg):
+        for y in range(hf-hg):
+            zmeanf = np.mean(f[x:x+wg,y:y+hg])
+            standarF = np.std(f[x:x+wg,y:y+hg])
+            fnew[x:x+wg,y:y+hg] = (f[x:x+wg,y:y+hg]-zmeanf)/standarF
+          
+    out = cross_correlation(f,g)
 
+    ### END YOUR CODE
+    
     return out

@@ -33,22 +33,11 @@ def matrix_mult(M, vector1, vector2):
     ### YOUR CODE HERE
     # Hint: convert arrays to matrices before multiplying
     # Notes: (vector1.T * vector2) must return a scalar 
-    #print (vector1.shape) => (3,)
-    #print (vector2.shape) => (3,)
-    #print (M.shape) => (4, 3)
-    
     out1 = np.dot(vector1,vector2)
-    
-    #print(out1)
-    #print (np.isscalar(out1))  => it True
     
     
     out2 = np.matmul(M,np.matrix(vector1).T)
     
-    #print(out2)
-    #print (type(out2))
-    
-   
     out = out1*out2
     return out
 
@@ -67,8 +56,7 @@ def svd(matrix):
     v = None
     ### YOUR CODE HERE
     #matrix = U.S.V(T) 
-    
-    
+    u, s, v = np.linalg.svd(matrix, full_matrices=True)
     ### END YOUR CODE
 
     return u, s, v
@@ -83,11 +71,13 @@ def get_singular_values(matrix, n):
         singular_values: array of shape (n)
     """
     singular_values = None
-    u, s, v = svd(matrix)
+    
+    
     ### YOUR CODE HERE
-    pass
+    u, s, v = svd(matrix)
+    singular_values = s
     ### END YOUR CODE
-    return singular_values
+    return singular_values[n]
 
 def eigen_decomp(matrix):
     """ Implement Eigen Value Decomposition
@@ -100,7 +90,7 @@ def eigen_decomp(matrix):
     w = None
     v = None
     ### YOUR CODE HERE
-    pass
+    
     ### END YOUR CODE
     return w, v
 
@@ -109,7 +99,6 @@ def get_eigen_values_and_vectors(matrix, num_values):
     Args:
         matrix: numpy matrix of shape (m, m)
         num_values: number of eigen values and respective vectors to return
-        
     Returns:
         eigen_values: array of shape (n)
         eigen_vectors: array of shape (m, n)
