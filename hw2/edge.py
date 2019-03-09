@@ -211,7 +211,7 @@ def double_thresholding(img, high, low):
             if img[x,y] >= high :
                 #print (img[x,y])
                 strong_edges[x,y] = img[x,y]
-            elif img[x,y] <= low:
+            elif img[x,y] >= low:
                 weak_edges[x,y] = img[x,y]
             else:
                 pass
@@ -298,7 +298,7 @@ def canny(img, kernel_size=5, sigma=1.4, high=20, low=15):
     strong_edges, weak_edges = double_thresholding(nms, high, low)
     edge = link_edges(strong_edges, weak_edges)
     
-    for i in range (50) :
+    for i in range (1) :
         edge = link_edges(edge, weak_edges)
     
     for i in range(len(edge)):
@@ -348,7 +348,10 @@ def hough_transform(img):
     # Find rho corresponding to values in thetas
     # and increment the accumulator in the corresponding coordiate.
     ### YOUR CODE HERE
-    pass
+    for y,x in zip(ys,xs):
+        for idx,theta in enumerate(thetas):
+            rho = int(x*cos_t[idx]+y*sin_t[idx])
+            accumulator[rho+diag_len,idx]+=1
     ### END YOUR CODE
 
     return accumulator, rhos, thetas
