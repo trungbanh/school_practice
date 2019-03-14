@@ -1,5 +1,6 @@
 import numpy as np
 import math 
+import queue 
 
 def conv(image, kernel):
     """ An implementation of convolution filter.
@@ -63,9 +64,9 @@ def gaussian_kernel(size, sigma =1):
     ### YOUR CODE HERE
     
     #defautl sigma = 1
-    k = size // 2
-    for i in range(0,2*k+1) :
-        for j in range(0,2*k+1) :
+    k = (size-1)/2
+    for i in range(0,size) :
+        for j in range(0,size) :
             kernel[i][j] = (1/(2*math.pi*sigma**2)) * math.exp(-((i-k)**2 +(j-k)**2)/ 2*sigma**2)
 
     
@@ -161,6 +162,7 @@ def non_maximum_suppression(G, theta):
     """
     H, W = G.shape
     out = np.zeros((H, W))
+    
 
     # Round the gradient direction to the nearest 45 degrees
     theta = np.floor((theta + 22.5) / 45) * 45
@@ -172,7 +174,7 @@ def non_maximum_suppression(G, theta):
             if (theta[x,y]==0 or theta[x,y]==180):
                 if (G[x,y]>G[x-1,y] and G[x,y]>G[x+1,y]) :
                     out[x,y] = G[x,y].copy()
-            elif (theta[x,y]==45 or theta[x,y]==125):
+            elif (theta[x,y]==45 or theta[x,y]==225):
                 if (G[x,y]>G[x-1,y-1] and G[x,y]>G[x+1,y+1]) :
                     out[x,y] = G[x,y].copy()
             elif (theta[x,y]==90 or theta[x,y]==270 ):
@@ -211,7 +213,7 @@ def double_thresholding(img, high, low):
             if img[x,y] >= high :
                 #print (img[x,y])
                 strong_edges[x,y] = img[x,y]
-            elif img[x,y] >= low:
+            elif img[x,y] >= low and img[x,y] >= high :
                 weak_edges[x,y] = img[x,y]
             else:
                 pass
@@ -268,14 +270,25 @@ def link_edges(strong_edges, weak_edges):
     edges = np.zeros((H, W))
 
     ### YOUR CODE HERE
+    q = queue.Queue()
     edges = strong_edges.copy()
 
     for (y,x) in indices :
         neighbors = get_neighbors(y,x,H,W)
         for (i,j) in neighbors:
-            edges[i,j] = weak_edges[i,j].copy()
+            if weak_edges[i,j] != 0 :
+                q.put((i,j))
+    while not q.empty():
+        i,j = q.get() 
+        edges[i,j] = 1
+        neighbors = get_neighbors(i,j,H,W)
+        for (i,j) in neighbors:
+            if edges[i,j] != 1 and weak_edges[i,j] !=0 :
+                q.put((i,j))
+        
+                
+            
     ### END YOUR CODE
-    edges = edges+strong_edges.copy()
     return edges
 
 def canny(img, kernel_size=5, sigma=1.4, high=20, low=15):
@@ -332,14 +345,17 @@ def hough_transform(img):
     # Set rho and theta ranges
     W, H = img.shape
     diag_len = int(np.ceil(np.sqrt(W * W + H * H)))
-    rhos = np.linspace(-diag_len, diag_len, diag_len * 2.0 + 1)
-    thetas = np.deg2rad(np.arange(-90.0, 90.0))
+    print (diag_len)
+    rhos = np.linspace(-diag_len, diag_len, diag_len * 2.0 + 1)#Return evenly spaced numbers over a specified interval.
+    print (rhos)
+    thetas = np.deg2rad(np.arange(-90.0, 90.0)) #Convert angles from degrees to radians.
 
     # Cache some reusable values
     cos_t = np.cos(thetas)
     sin_t = np.sin(thetas)
-    num_thetas = len(thetas)
+    num_thetas = len(thetas) # 180 goc do
 
+    print (num_thetas)
     # Initialize accumulator in the Hough space
     accumulator = np.zeros((2 * diag_len + 1, num_thetas), dtype=np.uint64)
     ys, xs = np.nonzero(img)
@@ -348,6 +364,7 @@ def hough_transform(img):
     # Find rho corresponding to values in thetas
     # and increment the accumulator in the corresponding coordiate.
     ### YOUR CODE HERE
+    print(ys,xs)
     for y,x in zip(ys,xs):
         for idx,theta in enumerate(thetas):
             rho = int(x*cos_t[idx]+y*sin_t[idx])
