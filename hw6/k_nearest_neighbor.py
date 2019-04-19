@@ -27,10 +27,23 @@ def compute_distances(X1, X2):
     #
     # HINT: Try to formulate the l2 distance using matrix multiplication
 
-    pass
+    # print(X1.shape)
+    # print(X2.shape)
+    X1_square = np.sum(np.square(X1), axis=1)  # lay theo tung hinh
+    # print(X1_square.shape)
+    X2_square = np.sum(np.square(X2), axis=1)
+    # print(X1_square.reshape(-1, 1).shape)
+    # print(X1.dot(X2.T).shape)
+    # print(X2_square.shape)
+
+    # sqrt (A**2 - 2AB + B**2) = sqrt((A-B)**2)
+    dists = np.sqrt(X1_square.reshape(-1, 1) - 2 * X1.dot(X2.T) + X2_square)
+    # dists = np.sqrt(X1_square - X2_square)
+
     # END YOUR CODE
 
-    assert dists.shape == (M, N), "dists should have shape (M, N), got %s" % dists.shape
+    assert dists.shape == (
+        M, N), "dists should have shape (M, N), got %s" % dists.shape
 
     return dists
 
@@ -48,6 +61,10 @@ def predict_labels(dists, y_train, k=1):
                 test data, where y[i] is the predicted label for the test point X[i].
     """
     num_test, num_train = dists.shape
+
+    # print('dists', dists.shape)
+    # print('train', y_train.shape)
+
     y_pred = np.zeros(num_test, dtype=np.int)
 
     for i in range(num_test):
@@ -65,7 +82,13 @@ def predict_labels(dists, y_train, k=1):
         # label.
 
         # YOUR CODE HERE
-        pass
+        # print(dists[2, :].shape)
+        idx = np.argsort(dists[i, :])
+        # idx la vi tri sao khi sort cua dists
+        for j in range(k):
+            # lay k gia tri cua y_train -> (label)
+            closest_y.append(y_train[idx[j]])
+        y_pred[i] = max(set(closest_y), key=closest_y.count)
         # END YOUR CODE
 
     return y_pred
@@ -111,7 +134,14 @@ def split_folds(X_train, y_train, num_folds):
 
     # YOUR CODE HERE
     # Hint: You can use the numpy array_split function.
-    pass
+    X_lst = np.array_split(X_train, num_folds, axis=0)
+    y_train = y_train.reshape(-1, 1)
+    y_lst = np.array_split(y_train, num_folds, axis=0)
+    for i in range(num_folds):
+        X_vals[i, :, :] = X_lst[i]
+        X_trains[i, :, :] = np.vstack(X_lst[:i] + X_lst[i+1:])
+        y_vals[i, :] = y_lst[i][:, 0]
+        y_trains[i, :] = np.vstack(y_lst[:i] + y_lst[i+1:])[:, 0]
     # END YOUR CODE
 
     return X_trains, y_trains, X_vals, y_vals
