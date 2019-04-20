@@ -78,10 +78,10 @@ def compute_cost(image, energy, axis=1):
     ### END YOUR CODE
 
     if axis == 0:
-        cost = np.transpose(cost, (1, 0))
+        cost = np.transpose(cost, (1, 0)) # dinh nghia lai chieu cua matrix 
         paths = np.transpose(paths, (1, 0))
 
-    # Check that paths only contains -1, 0 or 1
+        # Check that paths only contains -1, 0 or 1
     assert np.all(np.any([paths == 1, paths == 0, paths == -1], axis=0)), \
            "paths contains other values than -1, 0 or 1"
 
